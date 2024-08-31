@@ -23,7 +23,6 @@ export default function Home() {
         return response.json();
       })
       .then(data => {
-        // Shuffle the answers so the correct one isn't always first
         const shuffledAnswers = data.answers.sort(() => Math.random() - 0.5);
         setQuiz({ ...data, answers: shuffledAnswers });
         setSelectedAnswer(null);

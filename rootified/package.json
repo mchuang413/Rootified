@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "rootified",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "next": "14.2.7",
-    "node-fetch": "^3.3.2",
     "react": "^18",
     "react-dom": "^18"
   },
