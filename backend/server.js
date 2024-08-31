@@ -4,11 +4,13 @@ const { Pool } = require('pg');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 const pool = new Pool({
     connectionString: 'postgresql://LatinRootsModule_owner:Y5OFJKV3xjnr@ep-soft-limit-a5i6em4x.us-east-2.aws.neon.tech/LatinRootsModule?sslmode=require'
@@ -16,7 +18,6 @@ const pool = new Pool({
 
 const uri = "mongodb+srv://mchuangyc:p10U1cicI1VpoYTN@cluster0.basxm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const client = new MongoClient(uri, { serverApi: ServerApiVersion.v1 });
-
 
 async function createUser(email, password, level = 1) {
     try {
@@ -39,6 +40,56 @@ async function createUser(email, password, level = 1) {
         await client.close();
     }
 }
+
+async function findUserByEmail(email) {
+    try {
+        await client.connect();
+        const database = client.db("myDatabase");
+        const users = database.collection("users");
+        const user = await users.findOne({ email });
+        return user;
+    } finally {
+        await client.close();
+    }
+}
+
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).send('Email and password are required');
+    }
+
+    try {
+        const user = await findUserByEmail(email);
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).send('Invalid credentials');
+        }
+
+        res.cookie('username', email, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }); // 1 day
+        res.cookie('sessionId', 'yourSessionIdHere', { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }); // Mock session ID
+        res.status(200).json({ message: 'Login successful', username: email });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.post('/register', async (req, res) => {
+    const { email, password, level } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).send('Email and password are required');
+    }
+
+    try {
+        const userId = await createUser(email, password, level);
+        res.status(201).send(`User created with ID: ${userId}`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 app.get('/quiz', async (req, res) => {
     try {
@@ -79,24 +130,6 @@ app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
 
-
-app.post('/register', async (req, res) => {
-    const { email, password, level } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).send('Email and password are required');
-    }
-
-    try {
-        const userId = await createUser(email, password, level);
-        res.status(201).send(`User created with ID: ${userId}`);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
