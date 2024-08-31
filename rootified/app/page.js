@@ -1,32 +1,33 @@
-"use client"
-import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
+"use client";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/router"; // Assuming you're using Next.js
 
 export default function Home() {
   const [quiz, setQuiz] = useState(null);
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState("light");
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [result, setResult] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [isSignup, setIsSignup] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [username, setUsername] = useState(Cookies.get('username') || '');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showSuccessMessage, setShowSuccessMessage] = useState(""); // State for success message
+
+  const router = useRouter();
 
   useEffect(() => {
-    if (username) {
-      fetchQuiz();
-    }
-  }, [username]);
+    fetchQuiz();
+  }, []);
 
   const fetchQuiz = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/quiz');
-      if (!response.ok) throw new Error('Network response was not ok');
+      const response = await fetch("http://localhost:3000/quiz");
+      if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
       const shuffledAnswers = data.answers.sort(() => Math.random() - 0.5);
       setQuiz({ ...data, answers: shuffledAnswers });
@@ -34,14 +35,14 @@ export default function Home() {
       setResult(null);
       setIsAnswered(false);
     } catch (error) {
-      console.error('Error fetching quiz:', error);
+      console.error("Error fetching quiz:", error);
     }
     setIsLoading(false);
   };
 
   const handleThemeChange = (e) => {
     setTheme(e.target.value);
-    document.documentElement.setAttribute('data-theme', e.target.value);
+    document.documentElement.setAttribute("data-theme", e.target.value);
   };
 
   const handleAnswerSelection = (answer) => {
@@ -53,7 +54,11 @@ export default function Home() {
   const handleSubmit = () => {
     if (selectedAnswer && !isAnswered) {
       setIsAnswered(true);
-      setResult(selectedAnswer === quiz.correct_answer ? "Correct!" : "Incorrect, try again.");
+      setResult(
+        selectedAnswer === quiz.correct_answer
+          ? "Correct!"
+          : "Incorrect, try again."
+      );
     }
   };
 
@@ -68,33 +73,49 @@ export default function Home() {
 
   const handleFormSubmit = async () => {
     if (isSignup && password !== confirmPassword) {
-      alert('Passwords do not match!');
-      return;
+      return; // Exit early if passwords don't match
     }
-    const url = isSignup ? 'http://localhost:3000/register' : 'http://localhost:3000/login';
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await response.json();
-    if (response.ok) {
-      alert('Success: ' + JSON.stringify(data));
-      Cookies.set('username', data.username, { expires: 1 }); // Set cookie for 1 day
-      setUsername(data.username);
-      setShowModal(false);
-    } else {
-      alert('Error: ' + data.message);
+
+    const url = isSignup ? "http://localhost:3000/register" : "http://localhost:3000/login";
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const successMessage = isSignup ? "Successful account creation" : "Successful login";
+        setShowSuccessMessage(successMessage);
+        setShowModal(false);
+        setTimeout(() => {
+          setShowSuccessMessage(""); // Clear the message after a delay
+          router.push("/dashboard"); // Redirect to the desired webpage
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 
   return (
     <div className="min-h-screen bg-base-200 flex flex-col items-center justify-center" data-theme={theme}>
+      {showSuccessMessage && (
+        <div className="fixed top-0 left-0 right-0 flex justify-center mt-4">
+          <motion.div
+            className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {showSuccessMessage}
+          </motion.div>
+        </div>
+      )}
+
       <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 bg-base-100 shadow-md">
         <div className="flex items-center space-x-2">
-          <label className="label">
-            Theme:
-          </label>
+          <label className="label">Theme:</label>
           <select
             className="select select-bordered"
             value={theme}
@@ -123,7 +144,9 @@ export default function Home() {
             <option value="dracula">Dracula</option>
           </select>
         </div>
-        <button className="btn btn-accent">Signup/Login</button>
+        <button className="btn btn-accent" onClick={toggleModal}>
+          Signup/Login
+        </button>
       </div>
 
       <div className="card w-96 bg-base-100 shadow-xl mt-10">
@@ -135,7 +158,57 @@ export default function Home() {
             </div>
           ) : quiz ? (
             <div>
-              {/* Quiz Content... */}
+              <p className="mb-4 font-bold text-lg text-center">{quiz.question}</p>
+              <div className="form-control space-y-2">
+                {quiz.answers.map((answer, index) => (
+                  <label
+                    key={index}
+                    className={`label cursor-pointer rounded-lg p-3 transition-all duration-300 ${
+                      selectedAnswer === answer && isAnswered
+                        ? answer === quiz.correct_answer
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                        : "bg-base-200 hover:bg-base-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="quiz"
+                      className="radio radio-primary hidden"
+                      checked={selectedAnswer === answer}
+                      onChange={() => handleAnswerSelection(answer)}
+                      disabled={isAnswered}
+                    />
+                    <span className="label-text ml-2">{answer}</span>
+                  </label>
+                ))}
+              </div>
+              <button
+                className="btn btn-accent mt-4 w-full"
+                onClick={handleSubmit}
+                disabled={isAnswered}
+              >
+                Submit
+              </button>
+              {result && (
+                <div className="mt-4 text-lg font-bold text-center animate-fade-in">
+                  <p
+                    className={
+                      result === "Correct!" ? "text-green-500" : "text-red-500"
+                    }
+                  >
+                    {result}
+                  </p>
+                  {isAnswered && (
+                    <button
+                      className="btn btn-primary mt-4 w-full"
+                      onClick={handleNextQuestion}
+                    >
+                      Next Question
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             <p>Failed to load quiz. Please try again later.</p>
@@ -144,19 +217,83 @@ export default function Home() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-4 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">{isSignup ? 'Signup' : 'Login'}</h2>
-            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="input input-bordered w-full mb-4" />
-            <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="input input-bordered w-full mb-4" />
+        <motion.div
+          className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className="bg-base-100 p-8 rounded-lg shadow-lg w-full max-w-3xl"
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.8 }}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold">
+                {isSignup ? "Sign Up" : "Log In"}
+              </h2>
+              <button
+                className="btn btn-sm btn-ghost text-gray-400 hover:text-gray-600"
+                onClick={toggleModal}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="form-control mb-4">
+              <label className="label">
+                <span className="label-text">Email</span>
+              </label>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input input-bordered"
+              />
+            </div>
+            <div className="form-control mb-4">
+              <label className="label">
+                <span className="label-text">Password</span>
+              </label>
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input input-bordered"
+              />
+            </div>
             {isSignup && (
-              <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="input input-bordered w-full mb-4" />
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Confirm Password</span>
+                </label>
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="input input-bordered"
+                />
+              </div>
             )}
-            <button onClick={handleFormSubmit} className="btn btn-accent w-full mb-2">{isSignup ? 'Sign Up' : 'Log In'}</button>
-            <button onClick={() => setIsSignup(!isSignup)} className="btn btn-link">{isSignup ? 'Already have an account? Log In' : 'No account? Sign up'}</button>
-            <button onClick={toggleModal} className="btn btn-link text-gray-500">Close</button>
-          </div>
-        </div>
+            <button
+              className="btn btn-primary w-full mb-4"
+              onClick={handleFormSubmit}
+            >
+              {isSignup ? "Sign Up" : "Log In"}
+            </button>
+            <button
+              className="btn btn-link w-full mb-2"
+              onClick={() => setIsSignup(!isSignup)}
+            >
+              {isSignup
+                ? "Already have an account? Log In"
+                : "No account? Sign up"}
+            </button>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );
