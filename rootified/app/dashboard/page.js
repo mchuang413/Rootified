@@ -63,37 +63,24 @@ export default function Home() {
 
   const handleSubmit = async () => {
     if (selectedAnswer && !isAnswered) {
-      setIsAnswered(true);
-      const isCorrect = selectedAnswer === quiz.correct_answer;
-      setResult(isCorrect ? "Correct!" : "Incorrect, try again.");
-
-      if (isCorrect) {
-        const audio = new Audio(correctSound);
-        audio.play();
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-      } else {
-        const audio = new Audio(incorrectSound);
-        audio.play();
-      }
-
-      try {
-        const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/${isCorrect ? "correct" : "incorrect"}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: Cookies.get('userEmail'), word: quiz.question }),
-        });
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
+        setIsAnswered(true);
+        const isCorrect = selectedAnswer === quiz.correct_answer;
+        setResult(isCorrect ? "Correct!" : "Incorrect, try again.");
+        
+        try {
+            const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/${isCorrect ? "correct" : "incorrect"}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: Cookies.get('userEmail'), word: quiz.question }),
+            });
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+        } catch (error) {
+            console.error("Error submitting answer:", error);
         }
-      } catch (error) {
-        console.error("Error submitting answer:", error);
-      }
     }
-  };
+};
 
   const handleNextQuestion = () => {
     fetchQuiz();
@@ -223,31 +210,34 @@ export default function Home() {
             <div>
               <p className="mb-4 font-bold text-lg text-center">{quiz.question}</p>
               <div className="form-control space-y-2">
-              {quiz.answers.map((answer, index) => (
-              <label
-                  key={index}
-                  className={`label cursor-pointer rounded-lg p-3 transition-all duration-300 ${
-                    selectedAnswer === answer && !isAnswered
-                      ? "bg-blue-200 text-blue-700" 
-                      : selectedAnswer === answer && isAnswered
-                      ? answer === quiz.correct_answer
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                      : "bg-base-200 hover:bg-base-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="quiz"
-                    className="radio radio-primary hidden"
-                    checked={selectedAnswer === answer}
-                    onChange={() => handleAnswerSelection(answer)}
-                    disabled={isAnswered}
-                  />
-                  <span className="label-text ml-2">{answer}</span>
-                </label>
-              ))}
-              </div>
+                {quiz.answers.map((answer, index) => (
+                    <label
+                        key={index}
+                        className={`label cursor-pointer rounded-lg p-3 transition-all duration-300 ${
+                            isAnswered
+                                ? answer === quiz.correct_answer
+                                    ? "bg-green-100 text-green-700"  // Highlight the correct answer in green
+                                    : selectedAnswer === answer
+                                    ? "bg-red-100 text-red-700"      // Highlight the wrong answer in red
+                                    : "bg-base-200"
+                                : selectedAnswer === answer
+                                ? "bg-blue-200 text-blue-700"       // Highlight selected answer before submission
+                                : "bg-base-200 hover:bg-base-300"
+                        }`}
+                    >
+                        <input
+                            type="radio"
+                            name="quiz"
+                            className="radio radio-primary hidden"
+                            checked={selectedAnswer === answer}
+                            onChange={() => handleAnswerSelection(answer)}
+                            disabled={isAnswered}
+                        />
+                        <span className="label-text ml-2">{answer}</span>
+                    </label>
+                ))}
+            </div>
+]
               <button
                 className="btn btn-accent mt-4 w-full"
                 onClick={handleSubmit}
