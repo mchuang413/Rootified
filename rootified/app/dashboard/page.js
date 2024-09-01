@@ -130,11 +130,11 @@ export default function Home() {
           setShowSuccessMessage("");
         }, 2000);
       } else {
-        setLoginError("Email or password incorrect");  // Set error message
+        setLoginError("Email or password incorrect"); 
       }
     } catch (error) {
       console.error("Error:", error);
-      setLoginError("Email or password incorrect");  // Set error message in case of network failure
+      setLoginError("Email or password incorrect");
     }
   };
 
