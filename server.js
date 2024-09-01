@@ -55,7 +55,7 @@ async function updateUserPoints(email, points, word, isCorrect) {
 
     if (isCorrect) {
       user.correctList = updateCorrectList(user.correctList, word);
-      if (user.wrongList[word]) delete user.wrongList[word]; // Remove from wrongList if it's there
+      if (user.wrongList[word]) delete user.wrongList[word]; 
     } else {
       user.wrongList = updateWrongList(user.wrongList, word);
     }

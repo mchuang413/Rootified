@@ -30,7 +30,7 @@ export default function Home() {
   const fetchQuiz = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/quiz");
+      const response = await fetch("https://rootified-backend-52fb8.ondigitalocean.app/quiz");
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
       const shuffledAnswers = data.answers.sort(() => Math.random() - 0.5);
@@ -64,7 +64,7 @@ export default function Home() {
           : "Incorrect, try again."
       );
       try {
-        const response = await fetch(`http://localhost:3000/${selectedAnswer === quiz.correct_answer ? "correct" : "incorrect"}`, {
+        const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/${selectedAnswer === quiz.correct_answer ? "correct" : "incorrect"}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: Cookies.get('userEmail'), word: quiz.question }),
@@ -93,7 +93,7 @@ export default function Home() {
       return;
     }
 
-    const url = isSignup ? "http://localhost:3000/register" : "http://localhost:3000/login";
+    const url = isSignup ? "https://rootified-backend-52fb8.ondigitalocean.app/register" : "https://rootified-backend-52fb8.ondigitalocean.app/login";
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -109,7 +109,7 @@ export default function Home() {
         setShowModal(false);
         setTimeout(() => {
           setShowSuccessMessage("");
-          window.location.href = '/dashboard';  // Redirect to dashboard after successful login
+          window.location.href = '/dashboard';  
         }, 2000);
       } else {
         setLoginError("Email or password incorrect");  

@@ -4,9 +4,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import { DragCloseDrawerExample } from "../components/DragCloseDrawerExample";
-import confetti from "canvas-confetti"; // Import confetti
+import confetti from "canvas-confetti"; 
 
-// Sound files
 const correctSound = "/sounds/correct.mp3";
 const incorrectSound = "/sounds/incorrect.mp3";
 
@@ -37,7 +36,7 @@ export default function Home() {
   const fetchQuiz = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/quiz");
+      const response = await fetch("https://rootified-backend-52fb8.ondigitalocean.app/quiz");
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
       const shuffledAnswers = data.answers.sort(() => Math.random() - 0.5);
@@ -83,7 +82,7 @@ export default function Home() {
       }
 
       try {
-        const response = await fetch(`http://localhost:3000/${isCorrect ? "correct" : "incorrect"}`, {
+        const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/${isCorrect ? "correct" : "incorrect"}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: Cookies.get('userEmail'), word: quiz.question }),
@@ -104,7 +103,7 @@ export default function Home() {
   const toggleModal = () => {
     setShowModal(!showModal);
     setIsSignup(false);
-    setLoginError("");  // Clear error message when modal is toggled
+    setLoginError(""); 
   };
 
   const handleFormSubmit = async () => {
@@ -112,7 +111,7 @@ export default function Home() {
       return;
     }
 
-    const url = isSignup ? "http://localhost:3000/register" : "http://localhost:3000/login";
+    const url = isSignup ? "https://rootified-backend-52fb8.ondigitalocean.app/register" : "https://rootified-backend-52fb8.ondigitalocean.app/login";
     try {
       const response = await fetch(url, {
         method: "POST",

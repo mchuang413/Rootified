@@ -21,7 +21,7 @@ export const DragCloseDrawerExample = () => {
 
   const fetchCorrectWords = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/correctWords?email=${userEmail}`, {
+      const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/correctWords?email=${userEmail}`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${Cookies.get('token')}`
@@ -42,7 +42,7 @@ export const DragCloseDrawerExample = () => {
   
   const fetchWrongWords = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/wrongWords?email=${userEmail}`, {
+      const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/wrongWords?email=${userEmail}`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${Cookies.get('token')}`
@@ -63,7 +63,7 @@ export const DragCloseDrawerExample = () => {
   
   const fetchPoints = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/points?email=${userEmail}`, {
+      const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/points?email=${userEmail}`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${Cookies.get('token')}`
@@ -86,7 +86,7 @@ export const DragCloseDrawerExample = () => {
 
   const fetchMasteredWords = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/masteredWords?email=${userEmail}`, {
+      const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/masteredWords?email=${userEmail}`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${Cookies.get('token')}`
