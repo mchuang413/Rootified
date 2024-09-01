@@ -141,14 +141,17 @@ export default function Home() {
         </div>
       )}
 
-      <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 bg-base-100 shadow-md">
-        <div className="flex items-center space-x-2">
-          <label className="label">Theme:</label>
-          <select
-            className="select select-bordered"
-            value={theme}
-            onChange={handleThemeChange}
-          >
+        <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 bg-base-100 shadow-md">
+          <div className="flex items-center space-x-2">
+            {/* Logo with rounded corners */}
+            <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-lg" />
+            
+            <label className="label">Theme:</label>
+            <select
+              className="select select-bordered"
+              value={theme}
+              onChange={handleThemeChange}
+            >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
             <option value="cupcake">Cupcake</option>

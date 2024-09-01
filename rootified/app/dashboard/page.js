@@ -66,8 +66,7 @@ export default function Home() {
       setIsAnswered(true);
       const isCorrect = selectedAnswer === quiz.correct_answer;
       setResult(isCorrect ? "Correct!" : "Incorrect, try again.");
-      
-      // Play sound and trigger confetti
+
       if (isCorrect) {
         const audio = new Audio(correctSound);
         audio.play();
@@ -158,14 +157,17 @@ export default function Home() {
         </div>
       )}
 
-      <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 bg-base-100 shadow-md">
-        <div className="flex items-center space-x-2">
-          <label className="label">Theme:</label>
-          <select
-            className="select select-bordered"
-            value={theme}
-            onChange={handleThemeChange}
-          >
+        <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 bg-base-100 shadow-md">
+          <div className="flex items-center space-x-2">
+            {/* Logo with rounded corners */}
+            <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-lg" />
+            
+            <label className="label">Theme:</label>
+            <select
+              className="select select-bordered"
+              value={theme}
+              onChange={handleThemeChange}
+            >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
             <option value="cupcake">Cupcake</option>
@@ -190,18 +192,25 @@ export default function Home() {
           </select>
         </div>
         <div className="flex space-x-2">
-          <DragCloseDrawerExample />
-          {isLoggedIn ? (
-            <button className="btn btn-warning" onClick={handleLogout}>
-              Logout
-            </button>
-          ) : (
-            <button className="btn btn-accent" onClick={toggleModal}>
-              Signup/Login
-            </button>
-          )}
+            <a
+              href="https://methodize.methodlearning.com/dashboard"
+              className="btn btn-outline"
+            >
+              Go to Methodize Dashboard
+            </a>
+            {/* Existing button */}
+            <DragCloseDrawerExample />
+            {isLoggedIn ? (
+              <button className="btn btn-warning" onClick={handleLogout}>
+                Logout
+              </button>
+            ) : (
+              <button className="btn btn-accent" onClick={toggleModal}>
+                Signup/Login
+              </button>
+            )}
+          </div>
         </div>
-      </div>
 
       <div className="card w-96 bg-base-100 shadow-xl mt-10">
         <div className="card-body animate-fade-in">
