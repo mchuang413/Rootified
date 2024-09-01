@@ -5,7 +5,6 @@ import Link from "next/link";
 import Cookies from "js-cookie";
 import { DragCloseDrawerExample } from "../components/DragCloseDrawerExample";
 import confetti from "canvas-confetti"; 
-
 const correctSound = "/sounds/correct.mp3";
 const incorrectSound = "/sounds/incorrect.mp3";
 
@@ -66,6 +65,14 @@ export default function Home() {
         setIsAnswered(true);
         const isCorrect = selectedAnswer === quiz.correct_answer;
         setResult(isCorrect ? "Correct!" : "Incorrect, try again.");
+
+        if (isCorrect) {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+          });
+        }
         
         try {
             const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/${isCorrect ? "correct" : "incorrect"}`, {
