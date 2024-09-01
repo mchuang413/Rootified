@@ -237,7 +237,6 @@ export default function Home() {
                     </label>
                 ))}
             </div>
-]
               <button
                 className="btn btn-accent mt-4 w-full"
                 onClick={handleSubmit}
