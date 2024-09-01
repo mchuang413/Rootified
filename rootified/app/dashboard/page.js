@@ -1,7 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import Cookies from "js-cookie";
+import { DragCloseDrawerExample } from "../components/DragCloseDrawerExample";
+import confetti from "canvas-confetti"; // Import confetti
+
+// Sound files
+const correctSound = "/sounds/correct.mp3";
+const incorrectSound = "/sounds/incorrect.mp3";
 
 export default function Home() {
   const [quiz, setQuiz] = useState(null);
@@ -58,13 +65,25 @@ export default function Home() {
   const handleSubmit = async () => {
     if (selectedAnswer && !isAnswered) {
       setIsAnswered(true);
-      setResult(
-        selectedAnswer === quiz.correct_answer
-          ? "Correct!"
-          : "Incorrect, try again."
-      );
+      const isCorrect = selectedAnswer === quiz.correct_answer;
+      setResult(isCorrect ? "Correct!" : "Incorrect, try again.");
+      
+      // Play sound and trigger confetti
+      if (isCorrect) {
+        const audio = new Audio(correctSound);
+        audio.play();
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      } else {
+        const audio = new Audio(incorrectSound);
+        audio.play();
+      }
+
       try {
-        const response = await fetch(`http://localhost:3000/${selectedAnswer === quiz.correct_answer ? "correct" : "incorrect"}`, {
+        const response = await fetch(`http://localhost:3000/${isCorrect ? "correct" : "incorrect"}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: Cookies.get('userEmail'), word: quiz.question }),
@@ -85,7 +104,7 @@ export default function Home() {
   const toggleModal = () => {
     setShowModal(!showModal);
     setIsSignup(false);
-    setLoginError("");
+    setLoginError("");  // Clear error message when modal is toggled
   };
 
   const handleFormSubmit = async () => {
@@ -109,14 +128,13 @@ export default function Home() {
         setShowModal(false);
         setTimeout(() => {
           setShowSuccessMessage("");
-          window.location.href = '/dashboard';  // Redirect to dashboard after successful login
         }, 2000);
       } else {
-        setLoginError("Email or password incorrect");  
+        setLoginError("Email or password incorrect");  // Set error message
       }
     } catch (error) {
       console.error("Error:", error);
-      setLoginError("Email or password incorrect"); 
+      setLoginError("Email or password incorrect");  // Set error message in case of network failure
     }
   };
 
@@ -173,6 +191,7 @@ export default function Home() {
           </select>
         </div>
         <div className="flex space-x-2">
+          <DragCloseDrawerExample />
           {isLoggedIn ? (
             <button className="btn btn-warning" onClick={handleLogout}>
               Logout
@@ -316,17 +335,19 @@ export default function Home() {
                 />
               </div>
             )}
-            {loginError && (
+            {loginError && (  // Conditionally render the error message
               <div className="mb-4 text-red-500 text-center">
                 {loginError}
               </div>
             )}
-            <button
-              className="btn btn-primary w-full mb-4"
-              onClick={handleFormSubmit}
-            >
-              {isSignup ? "Sign Up" : "Log In"}
-            </button>
+            <Link href="/dashboard">
+              <button
+                className="btn btn-primary w-full mb-4"
+                onClick={handleFormSubmit}
+              >
+                {isSignup ? "Sign Up" : "Log In"}
+              </button>
+            </Link>
             <button
               className="btn btn-link w-full mb-2"
               onClick={() => setIsSignup(!isSignup)}
