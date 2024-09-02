@@ -20,10 +20,12 @@ export default function Home() {
   const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
-    fetchQuiz();
     const storedEmail = Cookies.get('userEmail');
     if (storedEmail) {
       setIsLoggedIn(true);
+      window.location.href = '/dashboard';
+    } else {
+      fetchQuiz();
     }
   }, []);
 
