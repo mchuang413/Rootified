@@ -190,7 +190,7 @@ export default function Home() {
 
       <div className="card w-96 bg-base-100 shadow-xl mt-10">
         <div className="card-body animate-fade-in">
-          <h2 className="card-title text-center">Latin Roots Quiz</h2>
+          <h2 className="card-title text-center">SAT Latin Roots</h2>
           {isLoading ? (
             <div className="flex justify-center">
               <span className="loading loading-spinner loading-lg"></span>
