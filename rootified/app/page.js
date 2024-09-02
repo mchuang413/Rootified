@@ -203,12 +203,12 @@ export default function Home() {
                         className={`label cursor-pointer rounded-lg p-3 transition-all duration-300 ${
                             isAnswered
                                 ? answer === quiz.correct_answer
-                                    ? "bg-green-100 text-green-700"  // Highlight the correct answer in green
+                                    ? "bg-green-100 text-green-700" 
                                     : selectedAnswer === answer
-                                    ? "bg-red-100 text-red-700"      // Highlight the wrong answer in red
+                                    ? "bg-red-100 text-red-700"  
                                     : "bg-base-200"
                                 : selectedAnswer === answer
-                                ? "bg-blue-200 text-blue-700"       // Highlight selected answer before submission
+                                ? "bg-blue-200 text-blue-700"   
                                 : "bg-base-200 hover:bg-base-300"
                         }`}
                     >
