@@ -5,6 +5,7 @@ import Link from "next/link";
 import Cookies from "js-cookie";
 import { DragCloseDrawerExample } from "../components/DragCloseDrawerExample";
 import confetti from "canvas-confetti"; 
+import { FaStar } from "react-icons/fa";
 const correctSound = "/sounds/correct.mp3";
 const incorrectSound = "/sounds/incorrect.mp3";
 
@@ -23,14 +24,35 @@ export default function Home() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(""); 
   const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [loginError, setLoginError] = useState("");
+  const [points, setPoints] = useState(0);
+  const [pointsChange, setPointsChange] = useState(null); 
+  
+  const userEmail = Cookies.get("userEmail");
 
   useEffect(() => {
     fetchQuiz();
+    fetchPoints(); 
     const storedEmail = Cookies.get('userEmail');
     if (storedEmail) {
       setIsLoggedIn(true);
     }
   }, []);
+
+  const fetchPoints = async () => {
+    try {
+      const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/points?email=${userEmail}`, {
+        method: "GET",
+          headers: {
+            "Authorization": `Bearer ${Cookies.get('token')}`
+          }
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      setPoints(data.points);
+    } catch (error) {
+      console.error("Error fetching points:", error);
+    }
+  };
 
   const fetchQuiz = async () => {
     setIsLoading(true);
@@ -65,6 +87,11 @@ export default function Home() {
         setIsAnswered(true);
         const isCorrect = selectedAnswer === quiz.correct_answer;
         setResult(isCorrect ? "Correct!" : "Incorrect, try again.");
+        
+        const pointChange = isCorrect ? 5 : -2;
+        setPoints(prevPoints => prevPoints + pointChange); 
+        setPointsChange(isCorrect ? "+5" : "-2"); 
+        setTimeout(() => setPointsChange(null), 1000); 
 
         if (isCorrect) {
           confetti({
@@ -87,7 +114,7 @@ export default function Home() {
             console.error("Error submitting answer:", error);
         }
     }
-};
+  };
 
   const handleNextQuestion = () => {
     fetchQuiz();
@@ -151,17 +178,16 @@ export default function Home() {
         </div>
       )}
 
-        <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 bg-base-100 shadow-md">
-          <div className="flex items-center space-x-2">
-            {/* Logo with rounded corners */}
-            <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-lg" />
-            
-            <label className="label">Theme:</label>
-            <select
-              className="select select-bordered"
-              value={theme}
-              onChange={handleThemeChange}
-            >
+      <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 bg-base-100 shadow-md">
+        <div className="flex items-center space-x-2">
+          <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-lg" />
+          
+          <label className="label">Theme:</label>
+          <select
+            className="select select-bordered"
+            value={theme}
+            onChange={handleThemeChange}
+          >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
             <option value="cupcake">Cupcake</option>
@@ -184,27 +210,52 @@ export default function Home() {
             <option value="luxury">Luxury</option>
             <option value="dracula">Dracula</option>
           </select>
-        </div>
-        <div className="flex space-x-2">
-            <a
-              href="https://methodize.methodlearning.com/dashboard"
-              className="btn btn-outline"
+
+          <div className="flex items-center space-x-2">
+            <FaStar className="text-yellow-500 text-2xl mr-2" />
+            <motion.div
+              key={points} 
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1.2 }}
+              transition={{ duration: 0.2 }}
+              className="text-md font-bold mr-2"
             >
-              Go to Methodize Dashboard
-            </a>
-            {/* Existing button */}
-            <DragCloseDrawerExample />
-            {isLoggedIn ? (
-              <button className="btn btn-warning" onClick={handleLogout}>
-                Logout
-              </button>
-            ) : (
-              <button className="btn btn-accent" onClick={toggleModal}>
-                Signup/Login
-              </button>
+              Points: {points}
+              </motion.div>
+              {pointsChange && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className={`text-lg font-bold ml-4 ${
+                    pointsChange.startsWith("+") ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {pointsChange}
+                </motion.div>
             )}
           </div>
         </div>
+
+        <div className="flex space-x-2">
+          <a
+            href="https://methodize.methodlearning.com/dashboard"
+            className="btn btn-outline"
+          >
+            Go to Methodize Dashboard
+          </a>
+          <DragCloseDrawerExample />
+          {isLoggedIn ? (
+            <button className="btn btn-warning" onClick={handleLogout}>
+              Logout
+            </button>
+          ) : (
+            <button className="btn btn-accent" onClick={toggleModal}>
+              Signup/Login
+            </button>
+          )}
+        </div>
+      </div>
 
       <div className="card w-96 bg-base-100 shadow-xl mt-10">
         <div className="card-body animate-fade-in">
@@ -223,12 +274,12 @@ export default function Home() {
                         className={`label cursor-pointer rounded-lg p-3 transition-all duration-300 ${
                             isAnswered
                                 ? answer === quiz.correct_answer
-                                    ? "bg-green-100 text-green-700"  // Highlight the correct answer in green
+                                    ? "bg-green-100 text-green-700" 
                                     : selectedAnswer === answer
-                                    ? "bg-red-100 text-red-700"      // Highlight the wrong answer in red
+                                    ? "bg-red-100 text-red-700" 
                                     : "bg-base-200"
                                 : selectedAnswer === answer
-                                ? "bg-blue-200 text-blue-700"       // Highlight selected answer before submission
+                                ? "bg-blue-200 text-blue-700"       
                                 : "bg-base-200 hover:bg-base-300"
                         }`}
                     >
@@ -243,7 +294,7 @@ export default function Home() {
                         <span className="label-text ml-2">{answer}</span>
                     </label>
                 ))}
-            </div>
+              </div>
               <button
                 className="btn btn-accent mt-4 w-full"
                 onClick={handleSubmit}
@@ -339,7 +390,7 @@ export default function Home() {
                 />
               </div>
             )}
-            {loginError && (  // Conditionally render the error message
+            {loginError && ( 
               <div className="mb-4 text-red-500 text-center">
                 {loginError}
               </div>
