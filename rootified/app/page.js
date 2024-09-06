@@ -61,7 +61,7 @@ export default function Home() {
     if (selectedAnswer && !isAnswered) {
         setIsAnswered(true);
         const isCorrect = selectedAnswer === quiz.correct_answer;
-        setResult(isCorrect ? "Correct!" : "Incorrect, try again.");
+        setResult(isCorrect ? "Correct!" : "");
         
         try {
             const response = await fetch(`https://rootified-backend-52fb8.ondigitalocean.app/${isCorrect ? "correct" : "incorrect"}`, {
@@ -190,7 +190,7 @@ export default function Home() {
 
       <div className="card w-96 bg-base-100 shadow-xl mt-10">
         <div className="card-body animate-fade-in">
-          <h2 className="card-title text-center">SAT Latin Roots</h2>
+          <h2 className="card-title text-center">Roots, Prefixes, and Suffixes</h2>
           {isLoading ? (
             <div className="flex justify-center">
               <span className="loading loading-spinner loading-lg"></span>
